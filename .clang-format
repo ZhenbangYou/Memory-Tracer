@@ -1,0 +1,12 @@
+# .clang-format
+BasedOnStyle: Google
+IndentWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+
+# Force each parameter on its own line in function declarations/definitions
+BinPackParameters: false
+
+# Force each argument on its own line in function calls
+BinPackArguments: false
+
