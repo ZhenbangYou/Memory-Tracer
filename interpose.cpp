@@ -31,10 +31,6 @@ class FastLogger {
     char buffer[BUFFER_SIZE];
     size_t cur_len = 0;
     int fd;
-    void flush() {
-        ssize_t _ = write(fd, buffer, cur_len);
-        cur_len = 0;
-    }
 
 public:
     FastLogger(const std::filesystem::path &filepath) {
@@ -95,6 +91,10 @@ public:
                                  tm_struct.tm_min,
                                  tm_struct.tm_sec,
                                  microsec.count());
+    }
+    void flush() {
+        ssize_t _ = write(fd, buffer, cur_len);
+        cur_len = 0;
     }
 };
 
@@ -196,6 +196,9 @@ static void exit_hook(int status, void *arg) {
     }
     loggers[category].log("\n");
     loggers[category].append_footer();
+    for (int i = 0; i < CATEGORY_COUNT; i++) {
+        loggers[category].flush();
+    }
 }
 
 extern "C" int __libc_start_main(int (*main)(int, char **, char **),
