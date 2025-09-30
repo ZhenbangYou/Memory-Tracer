@@ -220,6 +220,7 @@ extern "C" int __libc_start_main(int (*main)(int, char **, char **),
     }
     loggers[category].log("\n");
     loggers[category].append_footer();
+    loggers[category].flush();
     on_exit(exit_hook, new ExitHookArg{.argc = argc, .argv = argv});
 
     if (__libc_start_main__handle == nullptr) {
