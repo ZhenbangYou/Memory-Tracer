@@ -149,10 +149,12 @@ extern "C" int munmap(void *addr, size_t length) {
 }
 
 static void *first_call_buffer;
+static size_t first_call_buffer_size;
 extern "C" void *calloc(size_t n, size_t size) {
     if (first_call_buffer == nullptr) {
+        first_call_buffer_size = n * size;
         first_call_buffer = mmap(nullptr,
-                                 n * size,
+                                 first_call_buffer_size,
                                  PROT_READ | PROT_WRITE,
                                  MAP_PRIVATE | MAP_ANONYMOUS,
                                  0,
@@ -174,7 +176,9 @@ extern "C" void *malloc(size_t size) {
 }
 
 extern "C" void free(void *p) {
-    if (p != first_call_buffer) {
+    if (p == first_call_buffer) {
+        munmap(first_call_buffer, first_call_buffer_size);
+    } else {
         free__handle(p);
     }
 }
