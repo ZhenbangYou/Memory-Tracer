@@ -138,12 +138,16 @@ static void initialize() {
 
 extern "C" void *mmap(
     void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
+    SyscallCategories category = MMAP;
+    loggers[category].log("mmap\n");
     void *result =
         (void *)syscall(SYS_mmap, addr, length, prot, flags, fd, offset);
     return result;
 }
 
 extern "C" int munmap(void *addr, size_t length) {
+    SyscallCategories category = MMAP;
+    loggers[category].log("munmap\n");
     int ret = syscall(SYS_munmap, addr, length);
     return ret;
 }
@@ -151,6 +155,7 @@ extern "C" int munmap(void *addr, size_t length) {
 static void *first_call_buffer;
 static size_t first_call_buffer_size;
 extern "C" void *calloc(size_t n, size_t size) {
+    SyscallCategories category = ALLOC;
     if (first_call_buffer == nullptr) {
         first_call_buffer_size = n * size;
         first_call_buffer = mmap(nullptr,
@@ -161,6 +166,7 @@ extern "C" void *calloc(size_t n, size_t size) {
                                  0);
         return first_call_buffer;
     } else {
+        loggers[category].log("calloc\n");
         if (calloc__handle == nullptr) {
             initialize();
         }
@@ -169,13 +175,17 @@ extern "C" void *calloc(size_t n, size_t size) {
 }
 
 extern "C" void *malloc(size_t size) {
+    SyscallCategories category = ALLOC;
     if (malloc__handle == nullptr) {
         initialize();
     }
+    loggers[category].log("malloc\n");
     return malloc__handle(size);
 }
 
 extern "C" void free(void *p) {
+    SyscallCategories category = ALLOC;
+    loggers[category].log("free\n");
     if (p == first_call_buffer) {
         munmap(first_call_buffer, first_call_buffer_size);
     } else {
